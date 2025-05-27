@@ -1,74 +1,83 @@
 <?php
-include 'includes/header.php';
-require_once 'config/db.php';
+// Include header
+include_once 'includes/header.php';
 
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+// Redirect if already logged in
+if(isLoggedIn()) {
+    redirectBasedOnUserType();
+}
 
-    $stmt = $conn->prepare('SELECT id, password, role FROM talent_users WHERE email = ?');
-    $stmt->bind_param('s', $email);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $hash, $role);
-        $stmt->fetch();
-        if (password_verify($password, $hash)) {
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['role'] = $role;
-            $_SESSION['authenticated'] = true;
-            
-            // Use JavaScript for redirection instead of header() to avoid 'headers already sent' errors
-            $redirect_url = ($role === 'employer') ? 'employer/dashboard.php' : 'jobseeker/dashboard.php';
-            echo "<script>window.location.href = '$redirect_url';</script>";
-            // No exit needed as the JavaScript will handle redirection
-        } else {
-            $error = 'Invalid credentials.';
-        }
-    } else {
-        $error = 'Invalid credentials.';
+// Process login form
+$errors = [];
+
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get form data
+    $email = isset($_POST['email']) ? $_POST['email'] : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
+    
+    // Validate form data
+    if(empty($email)) {
+        $errors[] = "Email is required";
     }
-    $stmt->close();
+    
+    if(empty($password)) {
+        $errors[] = "Password is required";
+    }
+    
+    // Login user if no errors
+    if(empty($errors)) {
+        $result = loginUser($email, $password);
+        
+        if($result['success']) {
+            redirectBasedOnUserType();
+        } else {
+            $errors[] = $result['message'];
+        }
+    }
 }
 ?>
-<div class="container d-flex align-items-center justify-content-center min-vh-75 py-5">
-    <div class="card shadow-lg rounded-3 p-4 mx-auto bg-white bg-opacity-90" style="max-width:450px; width:100%;">
-        <div class="text-center mb-4">
-            <div class="d-inline-block rounded-circle bg-primary text-white p-3 mb-3">
-                <i class="bi bi-person-fill" style="font-size: 2rem;"></i>
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h3 class="card-title mb-0">Login to Your Account</h3>
             </div>
-            <h2 class="fw-bold text-primary mb-2">Login</h2>
-            <p class="text-muted">Enter your credentials to access your account</p>
-        </div>
-        
-        <?php if ($error): ?>
-            <div class="alert alert-danger d-flex align-items-center" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <div><?php echo $error; ?></div>
+            <div class="card-body">
+                <?php if(!empty($errors)): ?>
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            <?php foreach($errors as $error): ?>
+                                <li><?php echo $error; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+                
+                <form method="POST" action="login.php">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
             </div>
-        <?php endif; ?>
-        
-        <form method="post">
-            <div class="mb-3">
-                <label for="email" class="form-label fw-medium">Email</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" required>
-                </div>
+            <div class="card-footer bg-white text-center">
+                Don't have an account? <a href="register.php">Register</a>
             </div>
-            <div class="mb-4">
-                <label for="password" class="form-label fw-medium">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-medium rounded-pill shadow-sm">Sign In</button>
-        </form>
-        <div class="mt-4 text-center">
-            <p class="mb-0">Don't have an account? <a href="register.php" class="text-primary fw-medium">Register</a></p>
         </div>
     </div>
 </div>
-<?php include 'includes/footer.php'; ?>
+
+<?php
+// Include footer
+include_once 'includes/footer.php';
+?>

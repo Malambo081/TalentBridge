@@ -1,96 +1,94 @@
-# Talent Bridge
+# TalentBridge - Job Matching Platform
 
-![Talent Bridge Logo](assets/img/logo.png)
-
-Talent Bridge is a modern web application that connects talented professionals with employers, streamlining the job application and hiring process. Built with PHP, MySQL, HTML5, CSS3, and JavaScript, featuring a responsive design and intuitive user interface.
+TalentBridge is a minimal job matching platform built with HTML, CSS, JavaScript, PHP, and MySQL. The platform connects job seekers with employers through a clean, modern interface.
 
 ## Features
 
-### For Job Seekers
-- Create a professional profile and manage applications
-- Upload and manage CV documents
-- Search and filter job opportunities by various criteria
-- Track application status (pending, shortlisted, rejected)
-- Dashboard with application statistics and insights
+### Job Seeker Features
+- Sign Up / Login with secure password encryption
+- Profile Creation (name, email, skills, bio)
+- Browse Job Listings
+- Apply to Jobs with personalized messages
+- Track application status
 
-### For Employers
-- Post and manage job opportunities
-- Review applicant profiles and CV documents
-- Manage the hiring pipeline with status updates
-- Analytics dashboard with application statistics
-- Company profile management
+### Employer Features
+- Sign Up / Login
+- Post Jobs (title, description, required skills, deadline)
+- View and manage applications
+- Accept or reject applicants
 
 ### General Features
-- Responsive design that works on mobile, tablet and desktop
-- Modern UI with animations and transitions
-- Secure authentication system
-- Accessible interface with ARIA attributes
-- Protected against common security vulnerabilities
+- Responsive UI using Bootstrap
+- Clean Dashboard Layout
+- Modern design with smooth colors and good spacing
+- Mobile-friendly interface
 
-## Technology Stack
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
-- **Backend**: PHP 8.x
-- **Database**: MySQL
-- **Libraries**: Chart.js (for analytics), Font Awesome (for icons)
+## Installation
 
-## Getting Started
+1. Make sure you have XAMPP (or similar PHP/MySQL environment) installed
+2. Clone or download this repository to your `htdocs` folder
+3. Start Apache and MySQL services in XAMPP
+4. Open your browser and navigate to `http://localhost/Talent-Bridge/setup.php` to initialize the database
+5. After setup is complete, you'll be redirected to the homepage
 
-### Prerequisites
-- Web server with PHP 8.x support (Apache, Nginx)
-- MySQL 5.7+ database server
-- Composer (optional, for future dependencies)
+## Database Configuration
 
-### Installation
-1. Clone this repository to your web server directory:
-   ```
-   git clone https://github.com/your-username/talent-bridge.git
-   ```
-2. Import the provided `talent_bridge.sql` file into your MySQL server:
-   ```
-   mysql -u username -p < talent_bridge.sql
-   ```
-3. Configure your database credentials in `config/db.php`
-4. Ensure the `uploads` directory has write permissions
-5. Access the application through your web browser
+The default database configuration uses:
+- Host: localhost
+- Username: root
+- Password: (empty)
+- Database name: talentbridge
 
-## Database Schema
+If you need to change these settings, edit the `includes/config.php` file.
 
-The application uses the following database tables:
-- `talent_users` - User accounts (both job seekers and employers)
-- `talent_opportunities` - Job listings posted by employers
-- `talent_applications` - Job applications submitted by job seekers
-- `talent_documents` - Uploaded CV files and other documents
+## Usage
 
-## Folder Structure
+1. Register as either a Job Seeker or an Employer
+2. Job Seekers: Complete your profile, browse jobs, and submit applications
+3. Employers: Post jobs and review applications from candidates
+
+## Technologies Used
+
+- Frontend: HTML, CSS (Bootstrap 5), JavaScript
+- Backend: PHP
+- Database: MySQL
+- Icons: Font Awesome
+
+## File Structure
 
 ```
-talent-bridge/
-├── assets/             # Frontend assets
-│   ├── css/           # Stylesheets
-│   ├── js/            # JavaScript files
-│   ├── img/           # Images and icons
-│   └── uploads/       # User uploads (CVs, etc.)
-├── config/            # Configuration files
-├── includes/          # Shared PHP components
-├── employer/          # Employer-specific functionality
-├── jobseeker/         # Job seeker-specific functionality
-└── README.md          # This documentation
+Talent-Bridge/
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── main.js
+│   └── images/
+│       └── hero-image.svg
+├── includes/
+│   ├── auth.php
+│   ├── config.php
+│   ├── db_schema.php
+│   ├── footer.php
+│   └── header.php
+├── index.php
+├── register.php
+├── login.php
+├── logout.php
+├── jobs.php
+├── job_details.php
+├── profile.php
+├── jobseeker_dashboard.php
+├── employer_dashboard.php
+├── post_job.php
+├── view_applications.php
+├── setup.php
+└── README.md
 ```
 
-## Future Improvements
+## Security Features
 
-- Email notifications for application updates
-- Advanced applicant matching algorithms
-- Social media integration for profiles
-- Mobile application
-- Job recommendation engine
-- Interview scheduling system
-- Reporting and advanced analytics
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+- Password encryption using PHP's `password_hash()` function
+- Input sanitization to prevent SQL injection
+- Session handling for secure authentication
+- Form validation on both client and server sides

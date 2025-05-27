@@ -1,134 +1,119 @@
 /**
- * Talent Bridge - Main JavaScript
- * Handles UI interactions, animations, and form validations
+ * TalentBridge - Main JavaScript File
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Header scroll effect
-    const header = document.querySelector('.main-header');
-    if (header) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Skills selection functionality
+    const skillsContainer = document.getElementById('skills-container');
+    const skillsInput = document.getElementById('skills-input');
+    const skillsHiddenInput = document.getElementById('skills');
+    
+    if (skillsContainer && skillsInput && skillsHiddenInput) {
+        // Add skill when pressing Enter
+        skillsInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && this.value.trim() !== '') {
+                e.preventDefault();
+                addSkill(this.value.trim());
+                this.value = '';
+                updateSkillsHiddenInput();
+            }
+        });
+        
+        // Function to add a skill tag
+        function addSkill(skill) {
+            const skillTag = document.createElement('span');
+            skillTag.classList.add('skill-tag', 'me-2', 'mb-2');
+            skillTag.innerHTML = skill + ' <i class="fas fa-times-circle"></i>';
+            
+            skillTag.querySelector('i').addEventListener('click', function() {
+                skillTag.remove();
+                updateSkillsHiddenInput();
+            });
+            
+            skillsContainer.appendChild(skillTag);
+        }
+        
+        // Update hidden input with all skills
+        function updateSkillsHiddenInput() {
+            const skills = [];
+            document.querySelectorAll('.skill-tag').forEach(tag => {
+                skills.push(tag.textContent.trim().replace(' ×', ''));
+            });
+            skillsHiddenInput.value = JSON.stringify(skills);
+        }
+        
+        // Initialize skills from hidden input if it has a value
+        if (skillsHiddenInput.value) {
+            try {
+                const skills = JSON.parse(skillsHiddenInput.value);
+                skills.forEach(skill => addSkill(skill));
+            } catch (e) {
+                console.error('Error parsing skills:', e);
+            }
+        }
+    }
+    
+    // Job application form validation
+    const applicationForm = document.getElementById('application-form');
+    if (applicationForm) {
+        applicationForm.addEventListener('submit', function(e) {
+            const messageField = document.getElementById('application-message');
+            if (messageField && messageField.value.trim().length < 10) {
+                e.preventDefault();
+                alert('Please provide a more detailed application message (at least 10 characters).');
             }
         });
     }
-
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    if (tooltipTriggerList.length) {
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }
     
-    // Form validation
-    const forms = document.querySelectorAll('.needs-validation');
-    if (forms.length) {
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }
+    // Password strength indicator
+    const passwordInput = document.getElementById('password');
+    const passwordStrength = document.getElementById('password-strength');
     
-    // Job filter functionality
-    const jobFilter = document.getElementById('job-filter');
-    const jobCards = document.querySelectorAll('.job-card');
-    
-    if (jobFilter && jobCards.length) {
-        jobFilter.addEventListener('change', function() {
-            const filterValue = this.value;
+    if (passwordInput && passwordStrength) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
             
-            jobCards.forEach(card => {
-                if (filterValue === 'all' || card.dataset.jobType === filterValue) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+            if (password.length >= 8) strength += 1;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/\d/)) strength += 1;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 1;
+            
+            switch (strength) {
+                case 0:
+                    passwordStrength.innerHTML = '';
+                    break;
+                case 1:
+                    passwordStrength.innerHTML = '<div class="progress-bar bg-danger" style="width: 25%">Weak</div>';
+                    break;
+                case 2:
+                    passwordStrength.innerHTML = '<div class="progress-bar bg-warning" style="width: 50%">Fair</div>';
+                    break;
+                case 3:
+                    passwordStrength.innerHTML = '<div class="progress-bar bg-info" style="width: 75%">Good</div>';
+                    break;
+                case 4:
+                    passwordStrength.innerHTML = '<div class="progress-bar bg-success" style="width: 100%">Strong</div>';
+                    break;
+            }
         });
     }
     
-    // Alert auto-dismiss
-    const alerts = document.querySelectorAll('.alert-dismissible');
-    if (alerts.length) {
-        alerts.forEach(alert => {
-            setTimeout(() => {
-                const closeButton = alert.querySelector('.btn-close');
-                if (closeButton) {
-                    closeButton.click();
-                }
-            }, 5000);
+    // Confirm password validation
+    const confirmPasswordInput = document.getElementById('confirm-password');
+    if (passwordInput && confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            if (this.value !== passwordInput.value) {
+                this.setCustomValidity('Passwords do not match');
+            } else {
+                this.setCustomValidity('');
+            }
         });
-    }
-    
-    // Animated counters for statistics
-    const counterElements = document.querySelectorAll('.counter-value');
-    if (counterElements.length) {
-        const animateCounter = (el, final) => {
-            let start = 0;
-            const duration = 1500;
-            const step = timestamp => {
-                if (!start) start = timestamp;
-                const progress = Math.min((timestamp - start) / duration, 1);
-                el.innerText = Math.floor(progress * final);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                } else {
-                    el.innerText = final;
-                }
-            };
-            window.requestAnimationFrame(step);
-        };
-        
-        const observerCallback = (entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const target = entry.target;
-                    const finalValue = parseInt(target.dataset.count, 10);
-                    animateCounter(target, finalValue);
-                    observer.unobserve(target);
-                }
-            });
-        };
-        
-        const observer = new IntersectionObserver(observerCallback, { threshold: 0.5 });
-        counterElements.forEach(el => observer.observe(el));
-    }
-    
-    // Mobile nav toggle
-    const navToggle = document.getElementById('mobile-nav-toggle');
-    const navMenu = document.getElementById('main-nav');
-    
-    if (navToggle && navMenu) {
-        navToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('show');
-            this.setAttribute('aria-expanded', 
-                this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
-            );
-        });
-    }
-    
-    // Add animation to elements when they come into view
-    const animatedElements = document.querySelectorAll('.animate-on-scroll');
-    if (animatedElements.length) {
-        const animateOnScroll = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate__animated');
-                    entry.target.classList.add(entry.target.dataset.animation || 'animate__fadeIn');
-                    animateOnScroll.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        animatedElements.forEach(el => animateOnScroll.observe(el));
     }
 });

@@ -1,7 +1,11 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
-header('Location: index.php');
-exit();
+// Include auth functions
+require_once 'includes/auth.php';
+
+// Logout user
+logoutUser();
+
+// Redirect to home page
+header("Location: index.php");
+exit;
 ?>
